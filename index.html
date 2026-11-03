@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Trải Bài Tarot 6 Lá - Vũ Trụ Báo Thông Điệp</title>
+    <!-- Tailwind CSS cho layout và responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Playfair Display & Cinzel cho nét chữ huyền bí -->
+    <link href="https://fonts.googleapis.com/css2?family=CinzelDecorative:wght@700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #030308;
+            --gold: #d4af37;
+            --gold-light: #fcf6ba;
+            --gold-glow: rgba(212, 175, 55, 0.45);
+            --cosmic-purple: rgba(139, 92, 246, 0.35);
+            --cosmic-cyan: rgba(56, 189, 248, 0.25);
+            --card-bg: #0b0c1a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #e2e8f0;
+            font-family: 'Playfair Display', serif;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* --- BẦU TRỜI VŨ TRỤ & TINH VÂN --- */
+        #cosmosCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .nebula-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 18% 22%, rgba(91, 33, 182, 0.22) 0%, transparent 45%),
+                radial-gradient(circle at 82% 28%, rgba(30, 64, 175, 0.20) 0%, transparent 50%),
+                radial-gradient(circle at 50% 78%, rgba(180, 130, 35, 0.14) 0%, transparent 55%),
+                radial-gradient(circle at 50% 0%, #161233 0%, #05050d 65%, #020205 100%);
+            animation: nebulaPulse 14s ease-in-out infinite alternate;
+        }
+
+        @keyframes nebulaPulse {
+            0% { filter: hue-rotate(0deg) brightness(1); }
+            50% { filter: hue-rotate(12deg) brightness(1.12); }
+            100% { filter: hue-rotate(-8deg) brightness(0.95); }
+        }
+
+        /* Vòng tròn Ma Thuật Hoàng Đạo xoay nền */
+        .astrolabe-bg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: min(88vw, 760px);
+            height: min(88vw, 760px);
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.13;
+            animation: rotateSlow 90s linear infinite;
+        }
+
+        @keyframes rotateSlow {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes rotateReverse {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+
+        /* --- HIỆU ỨNG CHỮ VÀ VIỀN HUYỀN BÍ --- */
+        .mystic-text {
+            background: linear-gradient(90deg, #bf953f, #fcf6ba, #d4af37, #fbf5b7, #aa771c, #fcf6ba, #bf953f);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
+            animation: shineText 6s linear infinite;
+        }
+
+        @keyframes shineText {
+            to { background-position: 200% center; }
+        }
+
+        .mystic-border {
+            border: 1px solid rgba(212, 175, 55, 0.6);
+            box-shadow:
+                0 0 20px rgba(212, 175, 55, 0.2),
+                inset 0 0 20px rgba(139, 92, 246, 0.12);
+        }
+
+        .cosmic-glass {
+            background: linear-gradient(145deg, rgba(15, 14, 34, 0.78), rgba(8, 8, 20, 0.88));
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            box-shadow:
+                0 10px 40px rgba(0, 0, 0, 0.75),
+                0 0 25px rgba(139, 92, 246, 0.15),
+                inset 0 1px 0 rgba(252, 246, 186, 0.2);
+        }
+
+        /* --- 3D TAROT CARD (HIỂN THỊ ĐẦY ĐỦ 100% LÁ BÀI) --- */
+        .card-container {
+            width: 100%;
+            max-width: 240px;
+            /* Tỷ lệ chuẩn của lá bài Rider-Waite (350x600 = 7:12) giúp không bị cắt đầu/đuôi */
+            aspect-ratio: 7 / 12;
+            perspective: 1200px;
+            cursor: pointer;
+            margin: 0 auto;
+            position: relative;
+            transition: transform 0.35s ease;
+        }
+
+        .card-container:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        .card-container.floating {
+            animation: cosmicFloat 4.5s ease-in-out infinite;
+        }
+
+        @keyframes cosmicFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-7px); }
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+            transform-style: preserve-3d;
+        }
+
+        .card-container.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-cover, .card-face {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        /* Mặt sau của lá bài (Lưng bài Vũ Trụ Huyền Bí) */
+        .card-cover {
+            background: radial-gradient(circle at 50% 50%, #241744 0%, #0d0b1e 70%, #05040d 100%);
+            border: 2px solid var(--gold);
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.85),
+                0 0 15px rgba(212, 175, 55, 0.25),
+                inset 0 0 25px rgba(139, 92, 246, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-cover-pattern {
+            width: 88%;
+            height: 92%;
+            border: 1px solid rgba(212, 175, 55, 0.55);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background-image:
+                radial-gradient(rgba(212, 175, 55, 0.25) 1px, transparent 1px),
+                radial-gradient(rgba(167, 139, 250, 0.15) 1px, transparent 1px);
+            background-size: 18px 18px;
+            background-position: 0 0, 9px 9px;
+        }
+
+        .card-cover:hover {
+            box-shadow:
+                0 0 28px rgba(212, 175, 55, 0.65),
+                0 0 45px rgba(139, 92, 246, 0.45);
+        }
+
+        /* Mặt trước của lá bài - HIỂN THỊ TRỌN VẸN 100% HÌNH ẢNH */
+        .card-face {
+            transform: rotateY(180deg);
+            background: linear-gradient(180deg, #121024 0%, #070710 100%);
+            border: 2px solid var(--gold);
+            box-shadow:
+                0 0 25px rgba(212, 175, 55, 0.5),
+                0 0 45px rgba(139, 92, 246, 0.25);
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-face-frame {
+            width: 100%;
+            height: 100%;
+            border-radius: 9px;
+            overflow: hidden;
+            background-color: #f8f4e8;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.45);
+        }
+
+        .card-face img {
+            width: 100%;
+            height: 100%;
+            /* contain + đúng tỷ lệ 7:12 đảm bảo toàn bộ lá bài (số La Mã trên cùng & tên lá bài dưới cùng) hiện đầy đủ 100% */
+            object-fit: contain;
+            display: block;
+            background-color: #f5f0e1;
+            transition: transform 0.4s ease;
+        }
+
+        /* Hiệu ứng ánh hào quang quét qua lá bài khi đã lật */
+        .card-face-frame::after {
+            content: '';
+            position: absolute;
+            top: -120%;
+            left: -120%;
+            width: 240%;
+            height: 240%;
+            background: linear-gradient(
+                115deg,
+                transparent 40%,
+                rgba(255, 255, 255, 0.22) 48%,
+                rgba(212, 175, 55, 0.28) 50%,
+                rgba(139, 92, 246, 0.2) 52%,
+                transparent 60%
+            );
+            transform: rotate(15deg);
+            animation: holoSweep 5.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes holoSweep {
+            0% { transform: translate(-45%, -45%) rotate(15deg); }
+            50% { transform: translate(45%, 45%) rotate(15deg); }
+            100% { transform: translate(-45%, -45%) rotate(15deg); }
+        }
+
+        /* Nút bấm Vàng Vũ Trụ */
+        .btn-gold {
+            background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 50%, #b38728 100%);
+            background-size: 200% auto;
+            color: #090812;
+            border: 1px solid #fcf6ba;
+            box-shadow:
+                0 0 20px var(--gold-glow),
+                0 0 40px rgba(139, 92, 246, 0.25);
+            transition: all 0.35s ease;
+        }
+
+        .btn-gold:hover, .btn-gold:active {
+            background-position: right center;
+            box-shadow:
+                0 0 30px rgba(212, 175, 55, 0.9),
+                0 0 55px rgba(167, 139, 250, 0.5);
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .btn-cosmic-outline {
+            background: rgba(20, 16, 42, 0.7);
+            color: #fcf6ba;
+            border: 1px solid rgba(212, 175, 55, 0.65);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .btn-cosmic-outline:hover {
+            background: rgba(212, 175, 55, 0.18);
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.55);
+            transform: translateY(-2px);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 7px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #04040a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #bf953f, #6d28d9);
+            border-radius: 4px;
+        }
+
+        /* Loading Orb */
+        .cosmic-orb {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fcf6ba, #d4af37 40%, #6d28d9 80%, #090514 100%);
+            box-shadow:
+                0 0 25px #d4af37,
+                0 0 50px #8b5cf6,
+                0 0 80px rgba(56, 189, 248, 0.4);
+            animation: orbPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes orbPulse {
+            0% { transform: scale(0.92) rotate(0deg); filter: brightness(0.95); }
+            100% { transform: scale(1.08) rotate(180deg); filter: brightness(1.25); }
+        }
+
+        .font-sans-clean {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-4 md:p-8 select-none">
+
+    <!-- Lớp nền Tinh Vân & Bầu Trời Sao Vũ Trụ -->
+    <div class="nebula-layer"></div>
+    <canvas id="cosmosCanvas"></canvas>
+
+    <!-- Vòng Tròn Chiêm Tinh & Hình Học Thiêng Liêng -->
+    <svg class="astrolabe-bg" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="250" cy="250" r="240" stroke="#d4af37" stroke-width="1.2" stroke-dasharray="6 4"/>
+        <circle cx="250" cy="250" r="215" stroke="#d4af37" stroke-width="1.5"/>
+        <circle cx="250" cy="250" r="175" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3 6"/>
+        <circle cx="250" cy="250" r="130" stroke="#d4af37" stroke-width="1"/>
+        <!-- Ngôi sao 6 cánh (Hexagram) -->
+        <polygon points="250,35 436,357 64,357" stroke="#d4af37" stroke-width="1" fill="none" opacity="0.7"/>
+        <polygon points="250,465 436,143 64,143" stroke="#d4af37" stroke-width="1" fill="none" opacity="0.7"/>
+        <!-- Đường trục vũ trụ -->
+        <line x1="250" y1="10" x2="250" y2="490" stroke="#d4af37" stroke-width="0.7" opacity="0.5"/>
+        <line x1="10" y1="250" x2="490" y2="250" stroke="#d4af37" stroke-width="0.7" opacity="0.5"/>
+        <line x1="80" y1="80" x2="420" y2="420" stroke="#a78bfa" stroke-width="0.6" opacity="0.4"/>
+        <line x1="420" y1="80" x2="80" y2="420" stroke="#a78bfa" stroke-width="0.6" opacity="0.4"/>
+    </svg>
+
+    <!-- Header & Trạng Thái AI Tự Động -->
+    <header class="relative z-20 flex flex-wrap items-center justify-between gap-3 mb-4 max-w-6xl w-full mx-auto">
+        <div class="flex items-center gap-2 bg-black/50 border border-[#d4af37]/40 px-3.5 py-1.5 rounded-full backdrop-blur-md">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 -ml-3.5"></span>
+            <span class="text-xs md:text-sm text-[#fcf6ba] font-sans-clean">
+                AI Vũ Trụ: <strong class="text-emerald-300">Đã Kết Nối Tự Động (Miễn Phí)</strong>
+            </span>
+        </div>
+
+        <div class="relative">
+            <button onclick="toggleApiSettings()" class="text-xs text-gray-400 hover:text-[#d4af37] border border-gray-700/80 hover:border-[#d4af37]/60 bg-black/50 px-3 py-1.5 rounded-full transition flex items-center gap-1.5 font-sans-clean">
+                <span>⚙️ Cấu hình AI nâng cao</span>
+            </button>
+            <div id="apiSettingsPanel" class="hidden absolute right-0 top-10 bg-[#0d0c1d]/95 border border-[#d4af37]/50 rounded-xl p-4 w-72 shadow-2xl z-50 backdrop-blur-xl font-sans-clean">
+                <p class="text-xs text-[#fcf6ba] font-semibold mb-1">Cổng AI mặc định: Tự động (Pollinations OpenAI)</p>
+                <p class="text-[11px] text-gray-400 mb-3">Hệ thống đã tự động gắn AI để luận giải ngay mà không cần nhập khóa. Nếu bạn muốn dùng Gemini riêng, nhập vào bên dưới:</p>
+                <input type="password" id="geminiApiKey" placeholder="Gemini API Key (Không bắt buộc)" 
+                       class="w-full bg-black/70 border border-gray-600 text-gray-200 text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-[#d4af37]">
+                <div class="mt-2 flex justify-end">
+                    <button onclick="toggleApiSettings()" class="text-xs bg-[#d4af37] text-black px-3 py-1 rounded font-semibold">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="relative z-10 flex-grow flex flex-col items-center w-full max-w-6xl mx-auto">
+        
+        <div class="text-center mb-8">
+            <div class="inline-block text-xs uppercase tracking-[0.35em] text-purple-300/90 mb-2 px-4 py-1 rounded-full border border-purple-400/30 bg-purple-950/30">
+                ✦ Astral Tarot Oracle • 78 Lá Chuẩn Rider-Waite ✦
+            </div>
+            <h1 class="text-4xl md:text-6xl text-center mb-3 mystic-text font-bold tracking-wider">Tarot Huyền Bí Vũ Trụ</h1>
+            <p class="text-center text-gray-300/90 italic text-base md:text-lg max-w-2xl mx-auto">
+                Kết nối năng lượng Tinh Tú — Khám phá Quá khứ, Hiện tại, Tương lai và Lời Sấm Truyền AI dành riêng cho bạn
+            </p>
+        </div>
+
+        <!-- Khung Nhập Câu Hỏi -->
+        <div id="setupArea" class="w-full max-w-xl flex flex-col items-center space-y-6 mb-12">
+            <div class="w-full p-6 md:p-8 rounded-2xl cosmic-glass space-y-5">
+                <h2 class="text-center text-[#fcf6ba] text-xl md:text-2xl font-bold mb-2 border-b border-[#d4af37]/30 pb-3 flex items-center justify-center gap-2">
+                    <span>✧</span> Khởi Tạo Kết Nối Tâm Thức <span>✧</span>
+                </h2>
+                
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full md:w-3/5">
+                        <label for="fullName" class="block text-[#fcf6ba] text-sm mb-1.5">Họ và tên của bạn <span class="text-red-400">*</span></label>
+                        <input type="text" id="fullName" class="w-full bg-black/60 border border-[#d4af37]/40 rounded-xl p-3 text-white focus:outline-none focus:border-[#fcf6ba] focus:ring-1 focus:ring-[#d4af37] font-sans-clean select-text" placeholder="Vd: Nguyễn Bảo Ngọc">
+                    </div>
+                    <div class="w-full md:w-2/5">
+                        <label for="dob" class="block text-[#fcf6ba] text-sm mb-1.5">Ngày sinh (Tùy chọn)</label>
+                        <input type="date" id="dob" style="color-scheme: dark;" class="w-full bg-black/60 border border-[#d4af37]/40 rounded-xl p-3 text-white focus:outline-none focus:border-[#fcf6ba] focus:ring-1 focus:ring-[#d4af37] font-sans-clean select-text">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[#fcf6ba] text-sm mb-1.5">Chọn nhanh chủ đề hoặc tự viết câu hỏi:</label>
+                    <div class="flex flex-wrap gap-2 mb-2.5 font-sans-clean">
+                        <button type="button" onclick="setSampleQuestion('Công việc và sự nghiệp của tôi trong 6 tháng tới sẽ có bước ngoặt gì?')" class="text-xs px-3 py-1.5 rounded-full bg-purple-950/60 border border-purple-400/40 text-purple-200 hover:border-[#d4af37] hover:text-[#fcf6ba] transition">💼 Sự nghiệp & Công việc</button>
+                        <button type="button" onclick="setSampleQuestion('Chuyện tình cảm của tôi sắp tới sẽ diễn biến thế nào, người ấy có thật lòng không?')" class="text-xs px-3 py-1.5 rounded-full bg-pink-950/60 border border-pink-400/40 text-pink-200 hover:border-[#d4af37] hover:text-[#fcf6ba] transition">💖 Tình duyên & Mối quan hệ</button>
+                        <button type="button" onclick="setSampleQuestion('Tài chính và vận may tiền bạc của tôi trong thời gian tới ra sao?')" class="text-xs px-3 py-1.5 rounded-full bg-amber-950/60 border border-amber-400/40 text-amber-200 hover:border-[#d4af37] hover:text-[#fcf6ba] transition">🪙 Tài chính & Thịnh vượng</button>
+                        <button type="button" onclick="setSampleQuestion('Thông điệp quan trọng nhất mà Vũ Trụ muốn gửi đến tôi ngay lúc này là gì?')" class="text-xs px-3 py-1.5 rounded-full bg-indigo-950/60 border border-indigo-400/40 text-indigo-200 hover:border-[#d4af37] hover:text-[#fcf6ba] transition">🌌 Thông điệp Vũ Trụ</button>
+                    </div>
+                    <textarea id="question" rows="3" 
+                              class="w-full bg-black/60 border border-[#d4af37]/40 rounded-xl p-4 text-white focus:outline-none focus:border-[#fcf6ba] focus:ring-1 focus:ring-[#d4af37] text-[15px] resize-none font-sans-clean select-text"
+                              placeholder="Hít thở sâu, tập trung vào vấn đề của bạn và nhập câu hỏi tại đây..."></textarea>
+                </div>
+
+                <div class="flex items-center justify-between pt-1 text-xs text-gray-300 font-sans-clean">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="autoFlipToggle" checked class="accent-[#d4af37] w-4 h-4 rounded">
+                        <span>Tự động lật mở 6 lá bài & gọi AI luận giải ngay sau khi rút</span>
+                    </label>
+                </div>
+                
+                <p id="errorMsg" class="text-red-400 text-sm text-center mt-2 hidden font-sans-clean">⚠️ Vui lòng nhập đầy đủ Họ Tên và Câu Hỏi để Vũ Trụ hồi đáp!</p>
+            </div>
+            
+            <button id="drawBtn" onclick="startReading()" 
+                    class="btn-gold px-10 py-4 rounded-full text-lg md:text-xl font-bold uppercase tracking-widest w-full md:w-auto flex items-center justify-center gap-3">
+                <span>✦</span> Trộn & Rút 6 Lá Bài Định Mệnh <span>✦</span>
+            </button>
+        </div>
+
+        <!-- Trạng thái câu hỏi & Thanh công cụ lật bài (Hiển thị sau khi rút) -->
+        <div id="activeQuestionArea" class="hidden w-full text-center mb-8 pb-6 border-b border-[#d4af37]/30 cosmic-glass rounded-2xl p-6">
+            <p class="text-purple-300 uppercase tracking-widest text-xs mb-1">✦ Tần Số Năng Lượng Đang Kết Nối ✦</p>
+            <h3 id="activeUserInfo" class="text-xl md:text-2xl text-[#fcf6ba] mt-1 mb-3 font-bold"></h3>
+            <p class="text-gray-400 italic text-sm">Câu hỏi gửi tới Vũ Trụ:</p>
+            <h2 id="activeQuestionText" class="text-lg md:text-2xl text-[#d4af37] mt-1 font-bold max-w-3xl mx-auto"></h2>
+
+            <div id="flipControls" class="mt-5 flex flex-wrap items-center justify-center gap-4">
+                <button id="flipAllBtn" onclick="flipAllCards()" class="btn-cosmic-outline px-6 py-2.5 rounded-full text-sm font-bold tracking-wider uppercase flex items-center gap-2">
+                    <span>🌟</span> Lật Mở Tất Cả 6 Lá Bài & Xem Giải Đoán AI
+                </button>
+                <span id="flipStatusText" class="text-xs text-gray-300 font-sans-clean">
+                    (Hoặc chạm vào từng lá bài để lật mở • Chạm vào lá đã lật để phóng to)
+                </span>
+            </div>
+        </div>
+
+        <!-- Lưới 6 Lá Bài (Hiển thị đầy đủ 100% khung hình lá bài) -->
+        <div id="cardsGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5 md:gap-6 w-full hidden mb-14">
+            <!-- Rendered via JS -->
+        </div>
+
+        <!-- Khu vực Kết quả Giải Bài -->
+        <div id="resultsArea" class="hidden w-full flex-col items-center space-y-10 pb-24">
+            
+            <!-- Lời Sấm Truyền AI (Đặt lên đầu phần kết quả để người dùng đọc ngay thông điệp tổng hợp) -->
+            <div class="w-full p-6 md:p-10 rounded-3xl cosmic-glass mystic-border relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-purple-600 via-[#fcf6ba] to-purple-600"></div>
+                
+                <div class="flex flex-col items-center text-center mb-6">
+                    <div id="aiLoadingOrb" class="cosmic-orb mb-4"></div>
+                    <span class="text-xs uppercase tracking-[0.3em] text-purple-300 mb-1">Astral AI Oracle Synthesis</span>
+                    <h3 class="text-2xl md:text-4xl mystic-text font-bold">✧ Lời Sấm Truyền Từ Vũ Trụ ✧</h3>
+                </div>
+
+                <div id="aiSummary" class="text-gray-100 leading-relaxed text-base md:text-lg text-justify font-serif space-y-4 select-text">
+                    <p class="text-center text-[#fcf6ba] animate-pulse">Các tinh tú đang hội tụ để AI giải mã thông điệp riêng cho câu hỏi của bạn...</p>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-[#d4af37]/20 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-400 font-sans-clean">
+                    <span id="aiSourceBadge">🔮 Nguồn năng lượng: AI Vũ Trụ Tự Động</span>
+                    <button onclick="regenerateAIReading()" class="text-[#fcf6ba] hover:text-white underline flex items-center gap-1">
+                        🔄 Luận giải sâu thêm lần nữa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Giải Mã Chi Tiết Từng Lá Bài (Kèm Ảnh Đầy Đủ) -->
+            <div class="w-full">
+                <h3 class="text-2xl md:text-3xl text-center mystic-text font-bold border-b border-[#d4af37]/40 pb-4 mb-8 w-full">
+                    ✦ Giải Mã Chi Tiết 6 Lá Bài Định Mệnh ✦
+                </h3>
+                
+                <div id="cardMeanings" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4 pt-6">
+                <button onclick="resetApp()" class="btn-gold px-10 py-4 rounded-full font-bold uppercase tracking-wider text-base">
+                    ✦ Đặt Câu Hỏi Khác Cho Vũ Trụ ✦
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Phóng To Lá Bài Đầy Đủ (Lightbox Vũ Trụ) -->
+    <div id="cardModal" onclick="closeCardModal(event)" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 backdrop-blur-md p-4">
+        <div class="relative max-w-2xl w-full cosmic-glass rounded-2xl p-6 md:p-8 border border-[#d4af37] flex flex-col md:flex-row items-center gap-6" onclick="event.stopPropagation()">
+            <button onclick="closeCardModal()" class="absolute top-3 right-4 text-gray-400 hover:text-[#fcf6ba] text-2xl font-bold">&times;</button>
+            <div class="w-56 md:w-64 flex-shrink-0 aspect-[7/12] rounded-xl overflow-hidden border-2 border-[#d4af37] bg-[#f5f0e1] p-1.5 shadow-2xl">
+                <img id="modalCardImg" src="" alt="" class="w-full h-full object-contain rounded-lg">
+            </div>
+            <div class="flex-1 text-left space-y-3">
+                <div id="modalCardPos" class="inline-block text-xs uppercase tracking-widest px-3 py-1 rounded-full bg-purple-900/60 border border-[#d4af37]/50 text-[#fcf6ba]"></div>
+                <h3 id="modalCardName" class="text-2xl md:text-3xl font-bold mystic-text"></h3>
+                <p id="modalCardKeyword" class="text-sm text-[#fcf6ba] italic border-b border-[#d4af37]/30 pb-2"></p>
+                <p id="modalCardDesc" class="text-gray-200 text-sm md:text-base leading-relaxed font-sans-clean"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Application Logic -->
+    <script>
+        /* =========================================================================
+         * 1. HIỆU ỨNG BẦU TRỜI VŨ TRỤ, SAO BĂNG & BỤI TINH TÚ (COSMIC CANVAS)
+         * ========================================================================= */
+        const canvas = document.getElementById('cosmosCanvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let shootingStars = [];
+        let burstParticles = [];
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            const count = Math.min(260, Math.floor((canvas.width * canvas.height) / 5500));
+            const colors = ['#ffffff', '#fcf6ba', '#d4af37', '#c4b5fd', '#93c5fd', '#f9a8d4'];
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.8 + 0.3,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: Math.random(),
+                    speed: (Math.random() * 0.02 + 0.005) * (Math.random() < 0.5 ? 1 : -1),
+                    depth: Math.random() * 0.6 + 0.1
+                });
+            }
+        }
+
+        function spawnShootingStar() {
+            if (shootingStars.length > 2) return;
+            const startX = Math.random() * canvas.width * 0.8 + canvas.width * 0.1;
+            const startY = Math.random() * canvas.height * 0.35;
+            const angle = Math.PI / 4 + (Math.random() * 0.25 - 0.12);
+            const speed = Math.random() * 9 + 10;
+            shootingStars.push({
+                x: startX,
+                y: startY,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                length: Math.random() * 90 + 70,
+                alpha: 1
+            });
+        }
+
+        // Hiệu ứng nổ hạt bụi vàng vũ trụ khi lật bài
+        function createCardBurst(x, y) {
+            const colors = ['#fcf6ba', '#d4af37', '#a78bfa', '#38bdf8', '#ffffff'];
+            for (let i = 0; i < 42; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5.5 + 1.2;
+                burstParticles.push({
+                    x,
+                    y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    radius: Math.random() * 2.8 + 1,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: 1,
+                    decay: Math.random() * 0.02 + 0.014
+                });
+            }
+        }
+
+        function animateCosmos() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const offsetX = (mouseX - canvas.width / 2) * 0.015;
+            const offsetY = (mouseY - canvas.height / 2) * 0.015;
+
+            // Vẽ các vì sao lấp lánh
+            for (const s of stars) {
+                s.alpha += s.speed;
+                if (s.alpha >= 1) { s.alpha = 1; s.speed = -Math.abs(s.speed); }
+                if (s.alpha <= 0.15) { s.alpha = 0.15; s.speed = Math.abs(s.speed); }
+
+                const drawX = (s.x + offsetX * s.depth + canvas.width) % canvas.width;
+                const drawY = (s.y + offsetY * s.depth + canvas.height) % canvas.height;
+
+                ctx.save();
+                ctx.globalAlpha = s.alpha;
+                ctx.fillStyle = s.color;
+                ctx.shadowBlur = s.radius > 1.3 ? 8 : 0;
+                ctx.shadowColor = s.color;
+                ctx.beginPath();
+                ctx.arc(drawX, drawY, s.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Vẽ sao băng
+            if (Math.random() < 0.012) spawnShootingStar();
+            for (let i = shootingStars.length - 1; i >= 0; i--) {
+                const st = shootingStars[i];
+                st.x += st.vx;
+                st.y += st.vy;
+                st.alpha -= 0.016;
+
+                if (st.alpha <= 0 || st.x > canvas.width || st.y > canvas.height) {
+                    shootingStars.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                const grad = ctx.createLinearGradient(
+                    st.x, st.y,
+                    st.x - st.vx * (st.length / 12),
+                    st.y - st.vy * (st.length / 12)
+                );
+                grad.addColorStop(0, `rgba(252, 246, 186, ${st.alpha})`);
+                grad.addColorStop(0.4, `rgba(167, 139, 250, ${st.alpha * 0.6})`);
+                grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(st.x, st.y);
+                ctx.lineTo(st.x - st.vx * (st.length / 12), st.y - st.vy * (st.length / 12));
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Vẽ hạt bụi tinh tú khi lật bài
+            for (let i = burstParticles.length - 1; i >= 0; i--) {
+                const p = burstParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vx *= 0.97;
+                p.vy *= 0.97;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    burstParticles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            requestAnimationFrame(animateCosmos);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        resizeCanvas();
+        animateCosmos();
+
+
+        /* =========================================================================
+         * 2. DỮ LIỆU ĐẦY ĐỦ 78 LÁ BÀI TAROT RIDER-WAITE (ẢNH CHUẨN CDN + NGHĨA CHI TIẾT)
+         * ========================================================================= */
+        // ID khớp 100% với kho ảnh chuẩn Rider-Waite (m00-m21, w01-w14, c01-c14, s01-s14, p01-p14)
+        const tarotDeck = [
+            // --- 22 LÁ ẨN CHÍNH (MAJOR ARCANA) ---
+            { id: "m00", name: "0. The Fool (Kẻ Khờ)", element: "Khí • Khởi Nguyên", keyword: "Khởi đầu mới, tự do, bước nhảy niềm tin, thuần khiết", desc: "Bạn đang đứng trước một hành trình hoàn toàn mới. Đừng để nỗi sợ hãi cản bước; hãy giữ trái tim rộng mở, đón nhận cơ hội bất ngờ và tin vào sự dẫn dắt của Vũ Trụ." },
+            { id: "m01", name: "I. The Magician (Ảo Thuật Gia)", element: "Khí • Quyền Năng", keyword: "Ý chí, sáng tạo, hội tụ đủ nguồn lực, hành động", desc: "Mọi công cụ và năng lực cần thiết đều đã nằm trong tay bạn. Đây là thời điểm vàng để biến ý tưởng thành hiện thực bằng sự tập trung cao độ." },
+            { id: "m02", name: "II. The High Priestess (Nữ Tư Tế)", element: "Nước • Trực Giác", keyword: "Trực giác nhạy bén, tiềm thức, bí ẩn, tĩnh lặng", desc: "Câu trả lời bạn tìm kiếm không nằm ở vẻ bề ngoài ồn ào mà ẩn sâu trong trực giác. Hãy lắng nghe giấc mơ, linh cảm và tiếng nói nội tâm." },
+            { id: "m03", name: "III. The Empress (Hoàng Hậu)", element: "Đất • Trù Phú", keyword: "Sung túc, nuôi dưỡng, sáng tạo, tình yêu thương", desc: "Năng lượng của sự sinh sôi, đủ đầy và vẻ đẹp đang bao quanh bạn. Những hạt giống bạn gieo trồng sắp bước vào mùa thu hoạch ngọt ngào." },
+            { id: "m04", name: "IV. The Emperor (Hoàng Đế)", element: "Lửa • Uy Quyền", keyword: "Bản lĩnh, kỷ luật, nền tảng vững chắc, người bảo hộ", desc: "Hãy dùng lý trí, kế hoạch rõ ràng và sự kiên định để làm chủ tình huống. Sự vững vàng của bạn chính là chìa khóa dẫn đến thành tựu bền lâu." },
+            { id: "m05", name: "V. The Hierophant (Giáo Hoàng)", element: "Đất • Minh Triết", keyword: "Truyền thống, thầy dẫn đường, học hỏi, đạo đức", desc: "Tìm kiếm lời khuyên từ người có kinh nghiệm hoặc đi theo những giá trị chuẩn mực đã được kiểm chứng. Sự kiên trì học hỏi sẽ mở ra cánh cửa trí tuệ." },
+            { id: "m06", name: "VI. The Lovers (Tình Nhân)", element: "Khí • Hòa Hợp", keyword: "Tình yêu đích thực, sự đồng điệu, lựa chọn từ trái tim", desc: "Một mối liên kết sâu sắc hoặc một ngã rẽ quan trọng đang hiện diện. Hãy lắng nghe giá trị cốt lõi của trái tim để đưa ra quyết định chân thành nhất." },
+            { id: "m07", name: "VII. The Chariot (Chiến Xa)", element: "Nước • Chinh Phục", keyword: "Quyết tâm, bứt phá, làm chủ tốc độ, chiến thắng", desc: "Bằng ý chí sắt đá và sự tập trung không lay chuyển, bạn sẽ vượt qua mọi chướng ngại vật để tiến thẳng tới mục tiêu đã định." },
+            { id: "m08", name: "VIII. Strength (Sức Mạnh)", element: "Lửa • Nội Lực", keyword: "Lòng dũng cảm, bao dung, kiên nhẫn, thuần phục thử thách", desc: "Sức mạnh vĩ đại nhất không đến từ sự nóng vội mà từ lòng kiên nhẫn, sự dịu dàng và bản lĩnh làm chủ cảm xúc bên trong bạn." },
+            { id: "m09", name: "IX. The Hermit (Ẩn Sĩ)", element: "Đất • Chiêm Nghiệm", keyword: "Tĩnh tâm, soi chiếu nội tâm, trí tuệ sâu sắc", desc: "Hãy cho phép bản thân lùi lại một bước khỏi sự xô bồ để suy ngẫm. Ngọn đèn chân lý sẽ tỏa sáng khi tâm trí bạn thật sự bình yên." },
+            { id: "m10", name: "X. Wheel of Fortune (Bánh Xe Số Phận)", element: "Lửa • Vận Mệnh", keyword: "Bước ngoặt lớn, vận may, chu kỳ nhân quả, thay đổi", desc: "Bánh xe vũ trụ đang xoay chuyển mang theo cơ hội bất ngờ. Hãy linh hoạt đón nhận sự thay đổi vì vận mệnh đang mở ra trang mới thuận lợi hơn." },
+            { id: "m11", name: "XI. Justice (Công Lý)", element: "Khí • Nhân Quả", keyword: "Công bằng, sự thật sáng tỏ, minh bạch, cân bằng", desc: "Mọi nỗ lực chân chính của bạn sẽ được đền đáp xứng đáng. Hãy hành xử khách quan, trung thực và quyết đoán." },
+            { id: "m12", name: "XII. The Hanged Man (Kẻ Treo Ngược)", element: "Nước • Thức Tỉnh", keyword: "Góc nhìn mới, tạm dừng để tiến xa, buông bỏ kiểm soát", desc: "Đừng cố cưỡng cầu khi thời cơ chưa chín muồi. Thay đổi góc nhìn ngược lại sẽ giúp bạn phát hiện ra kho báu trí tuệ mà người khác bỏ lỡ." },
+            { id: "m13", name: "XIII. Death (Tử Thần)", element: "Nước • Tái Sinh", keyword: "Khép lại cái cũ, chuyển hóa mạnh mẽ, bình minh mới", desc: "Một giai đoạn cũ đã hoàn thành sứ mệnh. Hãy dũng cảm buông bỏ những gì không còn phù hợp để đón nhận sự tái sinh rực rỡ." },
+            { id: "m14", name: "XIV. Temperance (Tiết Chế)", element: "Lửa • Dung Hòa", keyword: "Cân bằng, chữa lành, ôn hòa, kết hợp hài hòa", desc: "Sự kiên nhẫn và điều độ sẽ mang lại phép màu. Hãy dung hòa giữa cảm xúc và lý trí để tìm thấy dòng chảy bình an." },
+            { id: "m15", name: "XV. The Devil (Ác Quỷ)", element: "Đất • Thử Thách", keyword: "Cám dỗ, nỗi sợ vô hình, đam mê mãnh liệt, giải phóng", desc: "Hãy nhận diện những nỗi sợ, sự phụ thuộc hoặc suy nghĩ tiêu cực đang trói buộc bạn. Khi bạn nhìn rõ chúng, xiềng xích sẽ tự khắc tan biến." },
+            { id: "m16", name: "XVI. The Tower (Tòa Tháp)", element: "Lửa • Giác Ngộ", keyword: "Thay đổi đột ngột, phá vỡ ảo tưởng, xây lại nền móng thật", desc: "Những gì không còn vững chắc sẽ sụp đổ để giải phóng bạn khỏi ảo tưởng. Sau cơn mưa trời lại sáng, bạn sẽ xây dựng lại cuộc sống chân thật hơn." },
+            { id: "m17", name: "XVII. The Star (Ngôi Sao)", element: "Khí • Hy Vọng", keyword: "Hy vọng, chữa lành tâm hồn, ước nguyện thành hiện thực", desc: "Bạn đang được Vũ Trụ dịu dàng che chở. Hãy giữ vững niềm tin vì ánh sáng của sự chữa lành, cảm hứng và may mắn đang dẫn lối cho bạn." },
+            { id: "m18", name: "XVIII. The Moon (Mặt Trăng)", element: "Nước • Tiềm Thức", keyword: "Nhạy cảm, trực giác sâu, vượt qua hoang mang", desc: "Mọi việc có thể chưa hiện rõ toàn bộ sự thật. Đừng để nỗi lo âu đánh lừa; hãy đi từng bước chậm rãi và lắng nghe trực giác dẫn đường." },
+            { id: "m19", name: "XIX. The Sun (Mặt Trời)", element: "Lửa • Rực Rỡ", keyword: "Thành công viên mãn, niềm vui, ấm áp, thịnh vượng", desc: "Ánh mặt trời rực rỡ xua tan mọi bóng tối! Thành công, niềm hạnh phúc, sức sống và vận may đang mỉm cười rạng rỡ với bạn." },
+            { id: "m20", name: "XX. Judgement (Phán Xét)", element: "Lửa • Tiếng Gọi", keyword: "Thức tỉnh, bước ngoặt lớn, tha thứ, nâng tầm bản thân", desc: "Tiếng gọi từ định mệnh đang vang lên. Hãy khép lại những tiếc nuối quá khứ để bước sang một chương đời cao hơn, ý nghĩa hơn." },
+            { id: "m21", name: "XXI. The World (Thế Giới)", element: "Đất • Viên Mãn", keyword: "Hoàn thành trọn vẹn, thành tựu lớn, vươn ra thế giới", desc: "Một hành trình dài đang tiến tới cái kết viên mãn và trọn vẹn nhất. Bạn xứng đáng tự hào về những gì mình đã kiên trì vượt qua." }
+        ];
+
+        // --- 56 LÁ ẨN PHỤ (MINOR ARCANA) VỚI Ý NGHĨA CHI TIẾT TỪNG LÁ ---
+        const minorArcanaDetails = {
+            w: {
+                suitName: "Wands (Gậy)",
+                element: "Lửa • Nhiệt Huyết & Hành Động",
+                cards: [
+                    { num: 1, title: "Ace of Wands (Át Gậy)", kw: "Cảm hứng bùng nổ, cơ hội mới, đam mê", desc: "Ngọn lửa sáng tạo và cơ hội mới đầy hứa hẹn vừa được trao vào tay bạn. Hãy nắm bắt ngay!" },
+                    { num: 2, title: "Two of Wands (2 Gậy)", kw: "Tầm nhìn xa, lập kế hoạch, bước ra thế giới", desc: "Bạn đang đứng trước chân trời rộng mở. Hãy mạnh dạn hoạch định chiến lược dài hạn và bước ra khỏi vùng an toàn." },
+                    { num: 3, title: "Three of Wands (3 Gậy)", kw: "Mở rộng, tiến triển thuận lợi, chờ đón thành quả", desc: "Những nỗ lực ban đầu đang đi đúng hướng. Cơ hội hợp tác và phát triển rộng lớn hơn đang tiến về phía bạn." },
+                    { num: 4, title: "Four of Wands (4 Gậy)", kw: "Ăn mừng, sum họp, nền tảng hạnh phúc", desc: "Giai đoạn của niềm vui, sự ổn định, lễ kỷ niệm hoặc tin vui trong gia đình và công việc." },
+                    { num: 5, title: "Five of Wands (5 Gậy)", kw: "Cạnh tranh, thử lửa, va chạm ý kiến", desc: "Có sự cạnh tranh hoặc bất đồng nhỏ xung quanh. Hãy xem đây là cơ hội rèn luyện bản lĩnh và khẳng định năng lực." },
+                    { num: 6, title: "Six of Wands (6 Gậy)", kw: "Chiến thắng, được công nhận, vinh quang", desc: "Nỗ lực của bạn sắp được đền đáp bằng sự công nhận, khen ngợi và thành công vẻ vang." },
+                    { num: 7, title: "Seven of Wands (7 Gậy)", kw: "Kiên định bảo vệ lập trường, bản lĩnh", desc: "Dù có áp lực hay sự cạnh tranh, bạn đang ở vị thế cao hơn. Hãy giữ vững niềm tin và bảo vệ thành quả của mình." },
+                    { num: 8, title: "Eight of Wands (8 Gậy)", kw: "Tốc độ nhanh, tin tức đến sớm, bứt phá", desc: "Mọi sự trì trệ đều tan biến. Tin vui hoặc tiến triển bất ngờ sẽ diễn ra với tốc độ rất nhanh." },
+                    { num: 9, title: "Nine of Wands (9 Gậy)", kw: "Bền bỉ tới cùng, kiên cường trước đích đến", desc: "Bạn đã đi được 90% chặng đường. Dù thấm mệt, hãy kiên trì thêm một chút nữa vì thành công đã ở ngay trước mắt." },
+                    { num: 10, title: "Ten of Wands (10 Gậy)", kw: "Trách nhiệm lớn, cần san sẻ gánh nặng", desc: "Bạn đang ôm đồm quá nhiều việc cùng lúc. Hãy học cách phân quyền và buông bớt những áp lực không cần thiết." },
+                    { num: 11, title: "Page of Wands (Thị Đồng Gậy)", kw: "Tin vui, nhiệt huyết khám phá, ý tưởng mới", desc: "Một nguồn năng lượng trẻ trung, tin tức tích cực hoặc dự án mới đầy hứng khởi đang gõ cửa." },
+                    { num: 12, title: "Knight of Wands (Kỵ Sĩ Gậy)", kw: "Hành động quyết liệt, phiêu lưu, bứt phá", desc: "Hãy tiến lên với lòng dũng cảm và đam mê rực lửa, nhưng nhớ giữ sự tỉnh táo để không vội vàng." },
+                    { num: 13, title: "Queen of Wands (Nữ Hoàng Gậy)", kw: "Tự tin, cuốn hút, ấm áp, độc lập", desc: "Hãy tỏa sáng bằng sự tự tin,魅力 và nguồn năng lượng tích cực của riêng bạn. Mọi người đều bị thu hút bởi ánh sáng của bạn." },
+                    { num: 14, title: "King of Wands (Vua Gậy)", kw: "Lãnh đạo tài ba, tầm nhìn lớn, truyền cảm hứng", desc: "Thời điểm để bạn nắm quyền chủ động, dẫn dắt cuộc chơi bằng tầm nhìn xa và bản lĩnh quyết đoán." }
+                ]
+            },
+            c: {
+                suitName: "Cups (Cốc)",
+                element: "Nước • Cảm Xúc & Tình Yêu",
+                cards: [
+                    { num: 1, title: "Ace of Cups (Át Cốc)", kw: "Tình yêu mới, đong đầy cảm xúc, hạnh phúc", desc: "Trái tim bạn đang đón nhận làn sóng yêu thương, sự đồng cảm sâu sắc và niềm vui tinh thần thuần khiết." },
+                    { num: 2, title: "Two of Cups (2 Cốc)", kw: "Tâm đầu ý hợp, gắn kết đôi lứa, hợp tác tốt đẹp", desc: "Một mối quan hệ tình cảm hoặc hợp tác vô cùng hòa hợp, tôn trọng và thấu hiểu lẫn nhau đang nở rộ." },
+                    { num: 3, title: "Three of Cups (3 Cốc)", kw: "Niềm vui hội ngộ, tình bạn, ăn mừng", desc: "Những khoảnh khắc sẻ chia niềm vui, sự ủng hộ từ bạn bè, đồng nghiệp và những buổi gặp gỡ ấm áp." },
+                    { num: 4, title: "Four of Cups (4 Cốc)", kw: "Trầm tư, cần mở lòng đón nhận cơ hội", desc: "Đừng mãi nhìn vào những điều chưa như ý mà bỏ lỡ chiếc cốc cơ hội quý giá Vũ Trụ đang trao ngay bên cạnh." },
+                    { num: 5, title: "Five of Cups (5 Cốc)", kw: "Học cách buông bỏ nỗi buồn, hướng về phía trước", desc: "Dù có chút tiếc nuối về chuyện đã qua, vẫn còn hai chiếc cốc đầy phía sau đang chờ bạn quay lại và trân trọng." },
+                    { num: 6, title: "Six of Cups (6 Cốc)", kw: "Kỷ niệm đẹp, sự chân thành, người cũ/tri kỷ", desc: "Năng lượng ấm áp từ quá khứ, sự quan tâm thuần khiết hoặc sự kết nối lại với một người mang lại cảm giác bình yên." },
+                    { num: 7, title: "Seven of Cups (7 Cốc)", kw: "Nhiều lựa chọn, ước mơ, cần tỉnh táo chọn lọc", desc: "Có rất nhiều cơ hội và ý tưởng hấp dẫn trước mắt. Hãy lắng nghe trái tim kết hợp thực tế để chọn điều giá trị nhất." },
+                    { num: 8, title: "Eight of Cups (8 Cốc)", kw: "Tìm kiếm ý nghĩa sâu sắc hơn, bước tiếp", desc: "Bạn nhận ra mình xứng đáng với những giá trị tinh thần cao hơn và sẵn sàng rời bỏ những gì đã không còn phù hợp." },
+                    { num: 9, title: "Nine of Cups (9 Cốc)", kw: "Cầu được ước thấy, mãn nguyện, hài lòng", desc: "Lá bài của ước nguyện thành hiện thực! Sự hài lòng, thịnh vượng và niềm vui cá nhân đang đến rất gần." },
+                    { num: 10, title: "Ten of Cups (10 Cốc)", kw: "Hạnh phúc viên mãn, bình yên, gia đình ấm êm", desc: "Bức tranh cầu vồng của sự viên mãn về mặt tình cảm, sự hòa thuận và bình yên trọn vẹn trong tâm hồn." },
+                    { num: 11, title: "Page of Cups (Thị Đồng Cốc)", kw: "Lời tỏ bày ngọt ngào, trực giác, cảm hứng nghệ thuật", desc: "Một tin nhắn dễ thương, một lời mời chân thành hoặc một cảm hứng sáng tạo dịu dàng đang tìm đến bạn." },
+                    { num: 12, title: "Knight of Cups (Kỵ Sĩ Cốc)", kw: "Lãng mạn, tinh tế, đi theo tiếng gọi trái tim", desc: "Sự xuất hiện của những cử chỉ lãng mạn, lời đề nghị tốt đẹp hoặc hành trình theo đuổi lý tưởng bằng cả trái tim." },
+                    { num: 13, title: "Queen of Cups (Nữ Hoàng Cốc)", kw: "Thấu cảm, dịu dàng, trực giác tâm linh sâu sắc", desc: "Hãy chăm sóc cảm xúc của bản thân và lắng nghe trực giác nhạy bén; sự dịu dàng của bạn có khả năng chữa lành mọi thứ." },
+                    { num: 14, title: "King of Cups (Vua Cốc)", kw: "Trưởng thành cảm xúc, điềm tĩnh, nhân hậu", desc: "Sự kết hợp hoàn hảo giữa trái tim ấm áp và cái đầu điềm tĩnh giúp bạn làm chủ mọi sóng gió một cách êm đẹp." }
+                ]
+            },
+            s: {
+                suitName: "Swords (Kiếm)",
+                element: "Khí • Trí Tuệ & Sự Thật",
+                cards: [
+                    { num: 1, title: "Ace of Swords (Át Kiếm)", kw: "Đột phá tư duy, sự thật sáng tỏ, quyết đoán", desc: "Màn sương mù được vén lên! Một ý tưởng sắc bén, sự thật rõ ràng và quyết định dứt khoát sẽ mang lại chiến thắng." },
+                    { num: 2, title: "Two of Swords (2 Kiếm)", kw: "Cân nhắc kỹ lưỡng, lắng nghe nội tâm để quyết định", desc: "Đừng trốn tránh việc lựa chọn. Khi bạn tháo bỏ băng bịt mắt của nỗi sợ, bạn sẽ biết rõ con đường cần đi." },
+                    { num: 3, title: "Three of Swords (3 Kiếm)", kw: "Giải tỏa nỗi buồn, đối diện sự thật để chữa lành", desc: "Những tổn thương hay hiểu lầm cần được nhìn nhận thẳng thắn để thanh lọc tâm hồn và mở đường cho sự chữa lành." },
+                    { num: 4, title: "Four of Swords (4 Kiếm)", kw: "Nghỉ ngơi phục hồi năng lượng, tĩnh dưỡng", desc: "Tâm trí bạn đã làm việc vất vả. Hãy cho phép mình nghỉ ngơi, thiền định và nạp lại năng lượng trước khi bước tiếp." },
+                    { num: 5, title: "Five of Swords (5 Kiếm)", kw: "Tránh tranh cãi vô bổ, chọn bình yên thay vì hơn thua", desc: "Không phải cuộc tranh luận nào cũng đáng để thắng. Hãy giữ gìn năng lượng cho những mục tiêu thực sự quan trọng." },
+                    { num: 6, title: "Six of Swords (6 Kiếm)", kw: "Rời bỏ sóng gió, tiến về bến bờ bình yên", desc: "Giai đoạn khó khăn nhất đang dần lùi lại phía sau. Bạn đang di chuyển sang một vùng nước êm ả và sáng sủa hơn." },
+                    { num: 7, title: "Seven of Swords (7 Kiếm)", kw: "Khôn khéo, chiến lược thông minh, cẩn trọng", desc: "Hãy hành động khéo léo, giữ kín kế hoạch quan trọng và dùng sự nhạy bén để bảo vệ quyền lợi của mình." },
+                    { num: 8, title: "Eight of Swords (8 Kiếm)", kw: "Thoát khỏi giới hạn tự đặt ra, tự do tư tưởng", desc: "Những rào cản hiện tại chủ yếu đến từ suy nghĩ lo âu của chính bạn. Hãy mạnh dạn bước ra, bạn hoàn toàn có lối thoát." },
+                    { num: 9, title: "Nine of Swords (9 Kiếm)", kw: "Buông bỏ lo âu thái quá, bình tâm trước giấc ngủ", desc: "Mọi chuyện thực tế không tệ như những kịch bản bạn đang lo lắng trong đêm. Hãy chia sẻ và để tâm trí được nhẹ nhàng." },
+                    { num: 10, title: "Ten of Swords (10 Kiếm)", kw: "Kết thúc tận cùng của khó khăn, bình minh đang ló dạng", desc: "Mọi thử thách nặng nề nhất đã chạm đáy và chấm dứt. Phía chân trời, ánh bình minh vàng rực đã bắt đầu chiếu sáng." },
+                    { num: 11, title: "Page of Swords (Thị Đồng Kiếm)", kw: "Nhạy bén, ham học hỏi, tin tức mới", desc: "Trí tò mò, sự tỉnh táo và khả năng nắm bắt thông tin nhanh nhạy sẽ giúp bạn phát hiện ra cơ hội quý giá." },
+                    { num: 12, title: "Knight of Swords (Kỵ Sĩ Kiếm)", kw: "Tốc độ, sắc bén, tiến thẳng tới mục tiêu", desc: "Khi đã xác định rõ mục tiêu, hãy hành động dứt khoát và mạnh mẽ, đồng thời lắng nghe thêm cảm xúc của người xung quanh." },
+                    { num: 13, title: "Queen of Swords (Nữ Hoàng Kiếm)", kw: "Thông tuệ, độc lập, thẳng thắn, thấu suốt", desc: "Sự sắc sảo, công tâm và khả năng nhìn thấu bản chất vấn đề sẽ giúp bạn đưa ra quyết định sáng suốt nhất." },
+                    { num: 14, title: "King of Swords (Vua Kiếm)", kw: "Trí tuệ đỉnh cao, chiến lược gia, công minh", desc: "Hãy dùng tư duy logic, tầm nhìn khách quan và nguyên tắc rõ ràng để giải quyết triệt để mọi bài toán hiện tại." }
+                ]
+            },
+            p: {
+                suitName: "Pentacles (Tiền)",
+                element: "Đất • Tài Lộc & Vững Bền",
+                cards: [
+                    { num: 1, title: "Ace of Pentacles (Át Tiền)", kw: "Vận may tài chính, khởi đầu thịnh vượng, cơ hội vàng", desc: "Một cơ hội thực tế về tiền bạc, công việc hoặc sự thịnh vượng lâu dài đang được Vũ Trụ trao tận tay bạn." },
+                    { num: 2, title: "Two of Pentacles (2 Tiền)", kw: "Linh hoạt cân bằng, quản lý thời gian & tài chính khéo léo", desc: "Dù bận rộn với nhiều đầu việc, sự uyển chuyển và thích nghi nhanh sẽ giúp bạn giữ mọi thứ trong tầm kiểm soát." },
+                    { num: 3, title: "Three of Pentacles (3 Tiền)", kw: "Hợp tác ăn ý, nâng cao tay nghề, được đánh giá cao", desc: "Làm việc nhóm hài hòa và sự chuyên nghiệp tận tâm của bạn đang tạo nên công trình vững chắc." },
+                    { num: 4, title: "Four of Pentacles (4 Tiền)", kw: "Tích lũy an toàn, bảo toàn nguồn lực", desc: "Sự cẩn trọng về tài chính giúp bạn vững vàng, nhưng đừng quên mở lòng đón nhận dòng chảy năng lượng mới." },
+                    { num: 5, title: "Five of Pentacles (5 Tiền)", kw: "Vượt qua thử thách tạm thời, luôn có ánh sáng hỗ trợ", desc: "Đừng cảm thấy cô đơn trước khó khăn trước mắt; hãy ngẩng đầu lên vì sự giúp đỡ và cánh cửa ấm áp đang ở ngay cạnh bạn." },
+                    { num: 6, title: "Six of Pentacles (6 Tiền)", kw: "Cho đi và nhận lại, quý nhân phù trợ, hào phóng", desc: "Sự cân bằng tuyệt đẹp của lòng tốt: bạn sẽ nhận được sự hỗ trợ đúng lúc hoặc có cơ hội sẻ chia thịnh vượng." },
+                    { num: 7, title: "Seven of Pentacles (7 Tiền)", kw: "Kiên nhẫn chờ mùa gặt, đầu tư dài hạn", desc: "Những hạt giống bạn dày công chăm sóc đang lớn lên từng ngày. Hãy kiên nhẫn, quả ngọt xứng đáng sắp đến." },
+                    { num: 8, title: "Eight of Pentacles (8 Tiền)", kw: "Chăm chỉ, rèn luyện kỹ năng, tận tâm", desc: "Sự tỉ mỉ, kiên trì trau dồi chuyên môn mỗi ngày chính là bệ phóng vững chắc nhất đưa bạn đến thành công lớn." },
+                    { num: 9, title: "Nine of Pentacles (9 Tiền)", kw: "Độc lập tài chính, sung túc, tận hưởng thành quả", desc: "Bạn đang bước vào giai đoạn tự chủ, thịnh vượng và tận hưởng những giá trị tốt đẹp do chính bàn tay mình tạo nên." },
+                    { num: 10, title: "Ten of Pentacles (10 Tiền)", kw: "Giàu có bền vững, di sản, gia đạo hưng thịnh", desc: "Đỉnh cao của sự ổn định vật chất, phúc lộc lâu dài và nền tảng vững chắc cho cả hiện tại lẫn tương lai." },
+                    { num: 11, title: "Page of Pentacles (Thị Đồng Tiền)", kw: "Cơ hội học tập, khởi đầu dự án thực tế, chăm chỉ", desc: "Một kế hoạch thiết thực, cơ hội nâng cao thu nhập hoặc việc học hỏi kỹ năng mới sẽ mang lại tương lai rộng mở." },
+                    { num: 12, title: "Knight of Pentacles (Kỵ Sĩ Tiền)", kw: "Đáng tin cậy, kiên định, từng bước chắc chắn", desc: "Chậm mà chắc! Sự bền bỉ, uy tín và kỷ luật của bạn sẽ biến mọi mục tiêu thành hiện thực không gì lay chuyển nổi." },
+                    { num: 13, title: "Queen of Pentacles (Nữ Hoàng Tiền)", kw: "Trù phú, chu đáo, thực tế, vượng khí", desc: "Sự kết hợp giữa tư duy thực tế nhạy bén và trái tim ấm áp giúp bạn vừa tạo ra tài lộc vừa chăm sóc tốt cuộc sống." },
+                    { num: 14, title: "King of Pentacles (Vua Tiền)", kw: "Thành đạt, thịnh vượng đỉnh cao, bản lĩnh vững vàng", desc: "Năng lượng của sự giàu có, uy tín và thành công bền vững. Bạn hoàn toàn đủ năng lực làm chủ vận mệnh tài chính của mình." }
+                ]
+            }
+        };
+
+        Object.keys(minorArcanaDetails).forEach(suitKey => {
+            const suitInfo = minorArcanaDetails[suitKey];
+            suitInfo.cards.forEach(c => {
+                const numStr = c.num < 10 ? '0' + c.num : String(c.num);
+                tarotDeck.push({
+                    id: `${suitKey}${numStr}`,
+                    name: c.title,
+                    element: suitInfo.element,
+                    keyword: c.kw,
+                    desc: c.desc
+                });
+            });
+        });
+
+        /* =========================================================================
+         * 3. BIẾN TOÀN CỤC & HÀM HỖ TRỢ HÌNH ẢNH LÁ BÀI
+         * ========================================================================= */
+        let drawnCards = [];
+        let flippedCount = 0;
+        let isReadingShown = false;
+
+        const positions = [
+            { title: "1. Quá Khứ", desc: "Căn nguyên dẫn đến hiện tại" },
+            { title: "2. Hiện Tại", desc: "Năng lượng bao quanh bạn lúc này" },
+            { title: "3. Tương Lai", desc: "Xu hướng đang mở ra phía trước" },
+            { title: "4. Thách Thức", desc: "Bài học & rào cản cần vượt qua" },
+            { title: "5. Lời Khuyên", desc: "Kim chỉ nam từ Vũ Trụ" },
+            { title: "6. Kết Quả", desc: "Đích đến khi hội đủ nhân duyên" }
+        ];
+
+        function toggleApiSettings() {
+            const panel = document.getElementById('apiSettingsPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        function setSampleQuestion(q) {
+            const qInput = document.getElementById('question');
+            qInput.value = q;
+            qInput.focus();
+        }
+
+        // Trộn bài Fisher-Yates
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Nguồn ảnh chuẩn CDN quốc tế (jsDelivr + GitHub Raw fallback + SVG fallback)
+        function getImageUrl(cardId) {
+            return `https://cdn.jsdelivr.net/gh/metabismuth/tarot-json@master/cards/${cardId}.jpg`;
+        }
+
+        function getBackupImageUrl(cardId) {
+            return `https://raw.githubusercontent.com/metabismuth/tarot-json/master/cards/${cardId}.jpg`;
+        }
+
+        function getSvgFallbackDataUri(cardName) {
+            const safeName = cardName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 350 600">
+                <rect width="350" height="600" fill="#100e20" stroke="#d4af37" stroke-width="10"/>
+                <rect x="20" y="20" width="310" height="560" fill="none" stroke="#d4af37" stroke-width="2"/>
+                <circle cx="175" cy="240" r="85" fill="none" stroke="#d4af37" stroke-width="2" stroke-dasharray="6 4"/>
+                <text x="175" y="255" text-anchor="middle" fill="#fcf6ba" font-size="56" font-family="serif">✧</text>
+                <text x="175" y="430" text-anchor="middle" fill="#fcf6ba" font-size="18" font-family="serif" font-weight="bold">${safeName}</text>
+            </svg>`;
+            return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        }
+
+        function handleCardImageError(imgEl, cardId, cardName) {
+            if (!imgEl.dataset.triedBackup) {
+                imgEl.dataset.triedBackup = 'true';
+                imgEl.src = getBackupImageUrl(cardId);
+            } else {
+                imgEl.src = getSvgFallbackDataUri(cardName);
+            }
+        }
+
+        /* =========================================================================
+         * 4. XỬ LÝ RÚT BÀI, LẬT BÀI & HIỂN THỊ ĐẦY ĐỦ 6 LÁ BÀI
+         * ========================================================================= */
+        function startReading() {
+            const fullNameInput = document.getElementById('fullName');
+            const dobInput = document.getElementById('dob');
+            const questionInput = document.getElementById('question');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            if (!questionInput.value.trim() || !fullNameInput.value.trim()) {
+                errorMsg.classList.remove('hidden');
+                if (!fullNameInput.value.trim()) fullNameInput.focus();
+                else questionInput.focus();
+                return;
+            }
+            errorMsg.classList.add('hidden');
+
+            const name = fullNameInput.value.trim();
+            let dobStr = '';
+            if (dobInput.value) {
+                const dateObj = new Date(dobInput.value);
+                const day = String(dateObj.getDate()).padStart(2, '0');
+                const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const year = dateObj.getFullYear();
+                const lifePath = calculateLifePathNumber(day, month, year);
+                dobStr = ` • Sinh ngày: ${day}/${month}/${year} (Số Chủ Đạo: ${lifePath})`;
+            }
+
+            // Cập nhật giao diện
+            document.getElementById('setupArea').classList.add('hidden');
+            document.getElementById('activeQuestionArea').classList.remove('hidden');
+            document.getElementById('activeUserInfo').innerText = `${name}${dobStr}`;
+            document.getElementById('activeQuestionText').innerText = `"${questionInput.value.trim()}"`;
+            document.getElementById('resultsArea').classList.add('hidden');
+            document.getElementById('flipAllBtn').classList.remove('hidden');
+
+            // Rút ngẫu nhiên 6 lá bài
+            const shuffledDeck = shuffle([...tarotDeck]);
+            drawnCards = shuffledDeck.slice(0, 6);
+            flippedCount = 0;
+            isReadingShown = false;
+
+            renderCardsGrid();
+
+            // Nếu bật tự động lật 6 lá bài
+            const autoFlip = document.getElementById('autoFlipToggle')?.checked;
+            if (autoFlip) {
+                setTimeout(() => {
+                    flipAllCards();
+                }, 900);
+            }
+        }
+
+        function calculateLifePathNumber(day, month, year) {
+            const digits = `${day}${month}${year}`.split('').map(Number);
+            let sum = digits.reduce((a, b) => a + b, 0);
+            while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+                sum = String(sum).split('').map(Number).reduce((a, b) => a + b, 0);
+            }
+            return sum;
+        }
+
+        function renderCardsGrid() {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+            grid.classList.remove('hidden');
+
+            drawnCards.forEach((card, index) => {
+                const safeCardName = card.name.replace(/'/g, "\\'");
+                const cardHTML = `
+                    <div class="flex flex-col items-center opacity-0 translate-y-4 transition-all duration-700" id="card-wrap-${index}">
+                        <div class="mb-2 text-center">
+                            <span class="text-xs uppercase tracking-wider text-purple-300 block">${positions[index].title}</span>
+                            <span class="text-[11px] text-gray-400 font-sans-clean">${positions[index].desc}</span>
+                        </div>
+                        <div class="card-container" id="card-${index}" onclick="handleCardClick(${index}, event)">
+                            <div class="card-inner">
+                                <!-- Lưng bài Vũ Trụ -->
+                                <div class="card-cover">
+                                    <div class="card-cover-pattern">
+                                        <div class="text-xs text-[#d4af37]/70 tracking-[0.25em] mb-2">✦ TAROT ✦</div>
+                                        <div class="w-16 h-16 rounded-full border border-[#d4af37]/60 flex items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.4)]">
+                                            <span class="text-3xl text-[#fcf6ba] animate-pulse">❂</span>
+                                        </div>
+                                        <div class="text-[10px] text-purple-300/70 tracking-widest mt-3 uppercase">Chạm để mở</div>
+                                    </div>
+                                </div>
+                                <!-- Mặt trước lá bài (Hiển thị đầy đủ 100% không cắt xén) -->
+                                <div class="card-face">
+                                    <div class="card-face-frame">
+                                        <img src="${getImageUrl(card.id)}" 
+                                             alt="${card.name}"
+                                             loading="eager"
+                                             onerror="handleCardImageError(this, '${card.id}', '${safeCardName}')">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="card-label-${index}" class="mt-2.5 text-center opacity-0 transition-opacity duration-500 min-h-[2.5rem]">
+                            <p class="text-xs md:text-sm font-bold text-[#fcf6ba] leading-tight">${card.name}</p>
+                            <p class="text-[11px] text-purple-300 font-sans-clean">${card.element}</p>
+                        </div>
+                    </div>
+                `;
+                grid.insertAdjacentHTML('beforeend', cardHTML);
+                
+                setTimeout(() => {
+                    const wrap = document.getElementById(`card-wrap-${index}`);
+                    if (wrap) {
+                        wrap.classList.remove('opacity-0', 'translate-y-4');
+                    }
+                }, index * 140 + 60);
+            });
+        }
+
+        function handleCardClick(index, event) {
+            const cardEl = document.getElementById(`card-${index}`);
+            if (!cardEl) return;
+
+            // Nếu lá bài đã lật rồi -> mở Modal xem ảnh lá bài cỡ lớn
+            if (cardEl.classList.contains('flipped')) {
+                openCardModal(index);
+                return;
+            }
+
+            flipCard(index, event);
+        }
+
+        function flipCard(index, event) {
+            const cardEl = document.getElementById(`card-${index}`);
+            if (!cardEl || cardEl.classList.contains('flipped')) return;
+
+            cardEl.classList.add('flipped', 'floating');
+            const labelEl = document.getElementById(`card-label-${index}`);
+            if (labelEl) labelEl.classList.remove('opacity-0');
+
+            // Tạo hiệu ứng nổ hạt bụi tinh tú tại vị trí lá bài
+            const rect = cardEl.getBoundingClientRect();
+            const burstX = event ? event.clientX : (rect.left + rect.width / 2);
+            const burstY = event ? event.clientY : (rect.top + rect.height / 2);
+            createCardBurst(burstX, burstY);
+
+            flippedCount++;
+
+            if (flippedCount === 6 && !isReadingShown) {
+                isReadingShown = true;
+                document.getElementById('flipAllBtn').classList.add('hidden');
+                setTimeout(() => {
+                    showInterpretations();
+                }, 750);
+            }
+        }
+
+        function flipAllCards() {
+            drawnCards.forEach((_, idx) => {
+                setTimeout(() => {
+                    flipCard(idx);
+                }, idx * 220);
+            });
+        }
+
+        // Modal phóng to lá bài
+        function openCardModal(index) {
+            const card = drawnCards[index];
+            if (!card) return;
+            const modal = document.getElementById('cardModal');
+            const img = document.getElementById('modalCardImg');
+            img.dataset.triedBackup = '';
+            img.src = getImageUrl(card.id);
+            img.onerror = () => handleCardImageError(img, card.id, card.name);
+
+            document.getElementById('modalCardPos').innerText = `${positions[index].title} — ${positions[index].desc}`;
+            document.getElementById('modalCardName').innerText = card.name;
+            document.getElementById('modalCardKeyword').innerText = `✦ Từ khóa: ${card.keyword} (${card.element})`;
+            document.getElementById('modalCardDesc').innerText = card.desc;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeCardModal(event) {
+            const modal = document.getElementById('cardModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        /* =========================================================================
+         * 5. HIỂN THỊ BẢNG GIẢI MÃ CHI TIẾT (KÈM ẢNH ĐẦY ĐỦ TỪNG LÁ)
+         * ========================================================================= */
+        function showInterpretations() {
+            const resultsArea = document.getElementById('resultsArea');
+            const cardMeanings = document.getElementById('cardMeanings');
+            cardMeanings.innerHTML = '';
+
+            drawnCards.forEach((card, index) => {
+                const safeCardName = card.name.replace(/'/g, "\\'");
+                const html = `
+                    <div onclick="openCardModal(${index})" class="cosmic-glass p-5 rounded-2xl flex flex-col sm:flex-row items-center sm:items-start gap-5 hover:border-[#fcf6ba] transition cursor-pointer group">
+                        <!-- Hình ảnh lá bài đầy đủ nguyên vẹn -->
+                        <div class="w-32 sm:w-28 md:w-32 flex-shrink-0 aspect-[7/12] rounded-xl overflow-hidden border-2 border-[#d4af37] bg-[#f5f0e1] p-1 shadow-lg group-hover:scale-105 transition-transform">
+                            <img src="${getImageUrl(card.id)}" 
+                                 alt="${card.name}"
+                                 class="w-full h-full object-contain rounded-lg"
+                                 onerror="handleCardImageError(this, '${card.id}', '${safeCardName}')">
+                        </div>
+                        <div class="flex-1 text-center sm:text-left">
+                            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 border-b border-[#d4af37]/25 pb-2 mb-2.5">
+                                <span class="text-[#fcf6ba] font-bold text-xs uppercase tracking-wider bg-purple-950/70 px-2.5 py-0.5 rounded-full border border-[#d4af37]/40">
+                                    ${positions[index].title}
+                                </span>
+                                <span class="text-xs text-purple-300 font-sans-clean">${card.element}</span>
+                            </div>
+                            <h4 class="text-xl font-bold text-white mb-1 group-hover:text-[#fcf6ba] transition">${card.name}</h4>
+                            <p class="text-[#d4af37] text-xs md:text-sm italic mb-2.5">✦ Từ khóa: ${card.keyword}</p>
+                            <p class="text-gray-200 text-sm leading-relaxed font-sans-clean">${card.desc}</p>
+                        </div>
+                    </div>
+                `;
+                cardMeanings.insertAdjacentHTML('beforeend', html);
+            });
+
+            resultsArea.classList.remove('hidden');
+            resultsArea.classList.add('flex');
+            
+            setTimeout(() => {
+                resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 150);
+
+            generateAISummary();
+        }
+
+        /* =========================================================================
+         * 6. HỆ THỐNG AI TỰ ĐỘNG ĐA TẦNG (KHÔNG CẦN API KEY + CÓ DỰ PHÒNG THÔNG MINH)
+         * ========================================================================= */
+        function regenerateAIReading() {
+            generateAISummary(true);
+        }
+
+        async function generateAISummary(forceRefresh = false) {
+            const customGeminiKey = document.getElementById('geminiApiKey').value.trim();
+            const summaryDiv = document.getElementById('aiSummary');
+            const orb = document.getElementById('aiLoadingOrb');
+            const badge = document.getElementById('aiSourceBadge');
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const dobInput = document.getElementById('dob').value;
+            const question = document.getElementById('question').value.trim();
+
+            let dobStr = '';
+            let lifePathInfo = '';
+            if (dobInput) {
+                const dateObj = new Date(dobInput);
+                const day = String(dateObj.getDate()).padStart(2, '0');
+                const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const year = dateObj.getFullYear();
+                const lp = calculateLifePathNumber(day, month, year);
+                dobStr = ` (sinh ngày ${day}/${month}/${year}, Con số chủ đạo Thần số học: ${lp})`;
+                lifePathInfo = `Người hỏi có Con số chủ đạo là ${lp}. `;
+            }
+
+            if (orb) orb.classList.remove('hidden');
+            summaryDiv.innerHTML = `
+                <div class="text-center py-6 space-y-2">
+                    <p class="text-[#fcf6ba] text-lg animate-pulse">✦ AI Vũ Trụ đang kết nối năng lượng 6 lá bài của ${fullName}... ✦</p>
+                    <p class="text-xs text-purple-300 font-sans-clean">Đang phân tích: ${drawnCards.map(c => c.name).join(' • ')}</p>
+                </div>
+            `;
+
+            const systemPrompt = `Bạn là một Đại Sư Tarot (Grand Tarot Master) huyền bí, uyên bác và giàu lòng trắc ẩn. Hãy luận giải trải bài 6 lá bằng tiếng Việt thật sâu sắc, mạch lạc, truyền cảm hứng và bám sát vào câu hỏi của người xem. Xưng là "Vũ Trụ" hoặc "Ta" và gọi người hỏi bằng tên của họ.`;
+
+            const userPrompt = `Người hỏi: ${fullName}${dobStr}.
+${lifePathInfo}Câu hỏi của họ: "${question}".
+
+Họ vừa rút được 6 lá bài Tarot chuẩn Rider-Waite ở các vị trí sau:
+1. Quá khứ: ${drawnCards[0].name} (${drawnCards[0].keyword})
+2. Hiện tại: ${drawnCards[1].name} (${drawnCards[1].keyword})
+3. Tương lai: ${drawnCards[2].name} (${drawnCards[2].keyword})
+4. Thách thức: ${drawnCards[3].name} (${drawnCards[3].keyword})
+5. Lời khuyên từ Vũ Trụ: ${drawnCards[4].name} (${drawnCards[4].keyword})
+6. Kết quả cuối cùng: ${drawnCards[5].name} (${drawnCards[5].keyword})
+
+Hãy viết bài luận giải chi tiết nhưng súc tích (khoảng 250 - 350 chữ), chia thành 3 đoạn rõ ràng:
+- Đoạn 1 (Bức tranh Dòng thời gian Quá khứ - Hiện tại - Tương lai): Kết nối 3 lá đầu tiên để giải thích nguyên nhân và xu hướng sắp tới liên quan trực tiếp đến câu hỏi "${question}".
+- Đoạn 2 (Vượt qua Thách thức & Nắm bắt Lời khuyên): Phân tích lá thứ 4 và lá thứ 5 để chỉ rõ họ cần lưu tâm điều gì và hành động ra sao.
+- Đoạn 3 (Thông điệp Kết quả & Lời chúc từ Tinh Tú): Giải mã lá thứ 6 và gửi một thông điệp định mệnh đầy năng lượng chữa lành cho ${fullName}.`;
+
+            try {
+                let aiText = null;
+                let sourceLabel = '';
+
+                // TẦNG 1: Nếu người dùng chủ động nhập Gemini API Key riêng
+                if (customGeminiKey) {
+                    aiText = await callCustomGeminiAPI(customGeminiKey, `${systemPrompt}\n\n${userPrompt}`);
+                    sourceLabel = '🔮 Nguồn năng lượng: Google Gemini AI (Khóa cá nhân)';
+                }
+
+                // TẦNG 2 (MẶC ĐỊNH TỰ ĐỘNG): Gọi cổng AI miễn phí không cần API Key (Pollinations OpenAI)
+                if (!aiText) {
+                    aiText = await callAutoPollinationsOpenAI(systemPrompt, userPrompt, forceRefresh);
+                    sourceLabel = '🔮 Nguồn năng lượng: AI Vũ Trụ Tự Động (OpenAI GPT)';
+                }
+
+                // TẦNG 3 (DỰ PHÒNG TỰ ĐỘNG 2): Gọi cổng Pollinations Text trực tiếp
+                if (!aiText) {
+                    aiText = await callAutoPollinationsDirect(`${systemPrompt}\n\n${userPrompt}`);
+                    sourceLabel = '🔮 Nguồn năng lượng: AI Tinh Tú Tự Động';
+                }
+
+                if (aiText && aiText.trim().length > 40) {
+                    renderFormattedAIOutput(aiText, sourceLabel);
+                    return;
+                }
+                throw new Error('Fallback to local synthesis');
+            } catch (err) {
+                // TẦNG 4 (BẤT TỬ): Bộ máy Tổng hợp Huyền Học Nội Tại (luôn trả ra bài giải sâu sắc theo đúng 6 lá bài & câu hỏi)
+                const synthesized = buildDeepLocalReading(fullName, dobStr, question, drawnCards);
+                renderFormattedAIOutput(synthesized, '🔮 Nguồn năng lượng: Tinh Hoa Huyền Học Vũ Trụ');
+            }
+        }
+
+        async function callCustomGeminiAPI(apiKey, prompt) {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+            if (!response.ok) return null;
+            const data = await response.json();
+            return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+        }
+
+        async function callAutoPollinationsOpenAI(systemPrompt, userPrompt, forceRefresh) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 18000);
+            try {
+                const seed = forceRefresh ? Math.floor(Math.random() * 100000) : 42;
+                const response = await fetch('https://text.pollinations.ai/openai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    signal: controller.signal,
+                    body: JSON.stringify({
+                        model: 'openai',
+                        seed: seed,
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: userPrompt }
+                        ]
+                    })
+                });
+                clearTimeout(timeoutId);
+                if (!response.ok) return null;
+                const data = await response.json();
+                return data?.choices?.[0]?.message?.content || null;
+            } catch (e) {
+                clearTimeout(timeoutId);
+                return null;
+            }
+        }
+
+        async function callAutoPollinationsDirect(fullPrompt) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            try {
+                const response = await fetch('https://text.pollinations.ai/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    signal: controller.signal,
+                    body: JSON.stringify({
+                        messages: [{ role: 'user', content: fullPrompt }],
+                        model: 'openai'
+                    })
+                });
+                clearTimeout(timeoutId);
+                if (!response.ok) return null;
+                return await response.text();
+            } catch (e) {
+                clearTimeout(timeoutId);
+                return null;
+            }
+        }
+
+        function buildDeepLocalReading(fullName, dobStr, question, cards) {
+            const majorCount = cards.filter(c => c.id.startsWith('m')).length;
+            const energyNote = majorCount >= 3
+                ? `Trong 6 lá bài bạn rút ra có tới ${majorCount} lá Ẩn Chính (Major Arcana) — dấu hiệu cho thấy vấn đề bạn hỏi không phải là ngẫu nhiên mà mang tính bước ngoặt định mệnh rất lớn.`
+                : `Sự kết hợp hài hòa giữa các nguyên tố trong trải bài cho thấy vận trình của bạn đang vận động mạnh mẽ và bạn hoàn toàn nắm quyền xoay chuyển cục diện.`;
+
+            return `**✦ Dòng Chảy Thời Gian (Quá Khứ • Hiện Tại • Tương Lai):**
+Hỡi **${fullName}**${dobStr}, lắng nghe câu hỏi của bạn về *"${question}"*, Vũ Trụ nhìn thấy hành trình của bạn khởi nguồn từ năng lượng của **${cards[0].name}** (${cards[0].keyword}). Những trải nghiệm trong quá khứ đã dẫn dắt bạn bước vào thực tại được soi chiếu bởi lá **${cards[1].name}** — nơi mà ${cards[1].desc.toLowerCase()} Khi dòng năng lượng này tiếp tục dịch chuyển, tương lai gần của bạn mở ra dưới ánh sáng của **${cards[2].name}** (${cards[2].keyword}). ${energyNote}
+
+**✦ Giải Mã Thách Thức & Kim Chỉ Nam Hành Động:**
+Thử thách lớn nhất mà bạn cần vượt qua lúc này được phản chiếu qua lá **${cards[3].name}** (${cards[3].keyword}): ${cards[3].desc} Để hóa giải bài toán đó, Vũ Trụ gửi đến bạn lời khuyên vàng ngọc qua lá **${cards[4].name}**: hãy tập trung vào *${cards[4].keyword.toLowerCase()}*. ${cards[4].desc}
+
+**✦ Sấm Truyền Kết Quả Cuối Cùng:**
+Khi bạn kết hợp được sự tỉnh thức của nội tâm và hành động theo lời khuyên trên, đích đến cuối cùng sẽ mở ra với năng lượng của **${cards[5].name}** (${cards[5].keyword}). ${cards[5].desc} Hãy giữ vững niềm tin vào bản thân, vì các vì sao đang sắp xếp để dẫn lối cho bạn tới bến bờ xứng đáng nhất!`;
+        }
+
+        function renderFormattedAIOutput(rawText, sourceLabel) {
+            const summaryDiv = document.getElementById('aiSummary');
+            const orb = document.getElementById('aiLoadingOrb');
+            const badge = document.getElementById('aiSourceBadge');
+
+            if (orb) orb.classList.add('hidden');
+            if (badge) badge.innerText = sourceLabel;
+
+            // Định dạng Markdown cơ bản sang HTML đẹp mắt
+            let formatted = rawText
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#fcf6ba] font-semibold">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em class="text-purple-200">$1</em>');
+
+            const paragraphs = formatted
+                .split(/\n\s*\n/)
+                .map(p => p.trim())
+                .filter(Boolean)
+                .map(p => `<p class="leading-relaxed bg-white/[0.03] p-4 rounded-xl border border-[#d4af37]/20">${p.replace(/\n/g, '<br/>')}</p>`)
+                .join('');
+
+            summaryDiv.innerHTML = paragraphs || `<p>${formatted}</p>`;
+        }
+
+        // Đặt lại ứng dụng để hỏi vấn đề khác
+        function resetApp() {
+            document.getElementById('setupArea').classList.remove('hidden');
+            document.getElementById('activeQuestionArea').classList.add('hidden');
+            document.getElementById('cardsGrid').classList.add('hidden');
+            document.getElementById('resultsArea').classList.add('hidden');
+            document.getElementById('resultsArea').classList.remove('flex');
+            
+            document.getElementById('question').value = '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
